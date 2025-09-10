@@ -1,0 +1,55 @@
+log:
+  level: debug
+  format: json
+
+serve:
+  proxy:
+    cors:
+      enabled: false
+
+errors:
+  fallback:
+    - json
+
+  handlers:
+    json:
+      enabled: true
+      config:
+        verbose: true
+
+access_rules:
+  matching_strategy: regexp
+  repositories:
+    - file:///etc/config/oathkeeper/access-rules.yml
+
+authenticators:
+  anonymous:
+    enabled: true
+    config:
+      subject: guest
+
+  bearer_token:
+    enabled: true
+    config:
+      check_session_url: http://localhost:3000/sessions/whoami
+      preserve_path: true
+      extra_from: 'identity.metadata_public'
+      subject_from: 'identity.traits.username'
+
+  noop:
+    enabled: true
+
+authorizers:
+  allow:
+    enabled: true
+
+mutators:
+  noop:
+    enabled: true
+  header:
+    enabled: true
+    config:
+      headers:
+        x-ant-user: '{{ print .Subject }}'
+        x-ant-user-roles: '{{ print .Extra.roles }}'
+        x-ant-user-custom-metadata: '{{ print .Extra.customMetadata }}'

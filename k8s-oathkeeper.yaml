@@ -1,0 +1,210 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: oathkeeper-config
+
+data:
+  oathkeeper.yml: |
+    log:
+      level: debug
+      format: json
+      leak_sensitive_values: true
+    serve:
+      proxy:
+        cors:
+          enabled: false
+    errors:
+      fallback:
+        - json
+      handlers:
+        json:
+          enabled: true
+          config:
+            verbose: true
+    access_rules:
+      matching_strategy: regexp
+      repositories:
+        - file:///etc/config/oathkeeper/access-rules.yml
+    authenticators:
+      anonymous:
+        enabled: true
+        config:
+          subject: guest
+      bearer_token:
+        enabled: true
+        config:
+          check_session_url: http://auth-server:3000/sessions/whoami
+          preserve_path: true
+          extra_from: 'identity.metadata_public'
+          subject_from: 'identity.traits.username'
+      noop:
+        enabled: true
+    authorizers:
+      allow:
+        enabled: true
+    mutators:
+      noop:
+        enabled: true
+      header:
+        enabled: true
+        config:
+          headers:
+            x-ant-user: '{{ print .Subject }}'
+            x-ant-user-roles: '{{ print .Extra.roles }}'
+            x-ant-user-custom-metadata: '{{ print .Extra.customMetadata }}'
+  access-rules.yml: |
+    [
+      {
+        'id': 'allow-all-rts-app',
+        'upstream': { 'preserve_host': true, 'url': 'http://rts-backend-rts-app-envoy:8080' },
+        'match': { 'url': '<https|http>://<.*>/rts.v1<.*>', 'methods': ['POST'] },
+        'authenticators': [{ 'handler': 'noop' }],
+        'authorizer': { 'handler': 'allow' },
+        'mutators': [{ 'handler': 'noop' }],
+      },
+      {
+        'id': 'allow-all-paperless-app',
+        'upstream': { 'preserve_host': true, 'url': 'http://paperless-app-envoy:8080' },
+        'match': { 'url': '<https|http>://<.*>/paperless.v1<.*>', 'methods': ['POST'] },
+        'authenticators': [{ 'handler': 'noop' }],
+        'authorizer': { 'handler': 'allow' },
+        'mutators': [{ 'handler': 'noop' }],
+      },
+      {
+        'id': 'work-orders-app',
+        'upstream': { 'preserve_host': true, 'url': 'http://work-orders-app-envoy:8080' },
+        'match': { 'url': '<https|http>://<.*>/work_orders.v1<.*>', 'methods': ['POST'] },
+        'authenticators': [{ 'handler': 'bearer_token' }],
+        'authorizer': { 'handler': 'allow' },
+        'mutators': [{ 'handler': 'header' }],
+      },
+      {
+        'id': 'triggers-app',
+        'upstream': { 'preserve_host': true, 'url': 'http://triggers-app-envoy:8080' },
+        'match': { 'url': '<https|http>://<.*>/triggers.v1<.*>', 'methods': ['POST'] },
+        'authenticators': [{ 'handler': 'bearer_token' }],
+        'authorizer': { 'handler': 'allow' },
+        'mutators': [{ 'handler': 'header' }],
+      },
+      {
+        'id': 'skills-app',
+        'upstream': { 'preserve_host': true, 'url': 'http://skills-app:8080' },
+        'match': { 'url': '<https|http>://<.*>/skills/v1<.*>', 'methods': ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] },
+        'authenticators': [{ 'handler': 'bearer_token' }],
+        'authorizer': { 'handler': 'allow' },
+        'mutators': [{ 'handler': 'header' }],
+      },
+      {
+        'id': 'allow-all-paperless-manager-app',
+        'upstream': { 'preserve_host': true, 'url': 'http://paperless-manager-app-envoy:8080' },
+        'match': { 'url': '<https|http>://<.*>/paperless_manager.v1<.*>', 'methods': ['POST'] },
+        'authenticators': [{ 'handler': 'noop' }],
+        'authorizer': { 'handler': 'allow' },
+        'mutators': [{ 'handler': 'noop' }],
+      },
+      {
+        'id': 'assets-app',
+        'upstream': { 'preserve_host': true, 'url': 'http://assets-app-envoy:8080' },
+        'match': { 'url': '<https|http>://<.*>/assets.v1<.*>', 'methods': ['POST'] },
+        'authenticators': [{ 'handler': 'bearer_token' }],
+        'authorizer': { 'handler': 'allow' },
+        'mutators': [{ 'handler': 'header' }],
+      },
+      {
+        'id': 'comments-app',
+        'upstream': { 'preserve_host': true, 'url': 'http://comments-app-envoy:8080' },
+        'match': { 'url': '<https|http>://<.*>/comments.v1<.*>', 'methods': ['POST'] },
+        'authenticators': [{ 'handler': 'bearer_token' }],
+        'authorizer': { 'handler': 'allow' },
+        'mutators': [{ 'handler': 'header' }],
+      },
+      {
+        'id': 'cmms-stats-app',
+        'upstream': { 'preserve_host': true, 'url': 'http://cmms-stats-app-envoy:8080' },
+        'match': { 'url': '<https|http>://<.*>/cmms_stats.v1<.*>', 'methods': ['POST'] },
+        'authenticators': [{ 'handler': 'bearer_token' }],
+        'authorizer': { 'handler': 'allow' },
+        'mutators': [{ 'handler': 'header' }],
+      },
+      {
+        'id': 'oauth2-protected-services-sap-write',
+        'upstream': { 'url': 'http://aosmgmt01-an-dev-rsi.antsolutions.cloud:8000' },
+        'match': { 'url': '<https|http>://<.*>/services/SAP<.*>', 'methods': ['POST'] },
+        'authenticators': [ { 'handler': 'bearer_token', 'config': { 'check_session_url': 'http://oauth2-server-app:9127/auth/validate' } } ],
+        'authorizer': { 'handler': 'allow' },
+        'mutators': [{ 'handler': 'noop' }],
+      },
+      {
+        'id': 'inventory-app',
+        'upstream': { 'preserve_host': true, 'url': 'http://inventory-app-envoy:8080' },
+        'match': { 'url': '<https|http>://<.*>/inventory.v1<.*>', 'methods': ['POST'] },
+        'authenticators': [{ 'handler': 'bearer_token' }],
+        'authorizer': { 'handler': 'allow' },
+        'mutators': [{ 'handler': 'header' }],
+      },
+      {
+        'id': 'myapp-app',
+        'upstream': { 'preserve_host': true, 'url': 'http://myapp:4000' },
+        'match': { 'url': '<https|http>://<.*>/myapp/v1<.*>', 'methods': ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] },
+        'authenticators': [{ 'handler': 'bearer_token' }],
+        'authorizer': { 'handler': 'allow' },
+        'mutators': [{ 'handler': 'header' }],
+      }
+    ]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: oathkeeper
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: oathkeeper
+  template:
+    metadata:
+      labels:
+        app: oathkeeper
+    spec:
+      containers:
+      - name: oathkeeper
+        image: oryd/oathkeeper:v0.40.6
+        args:
+          - serve
+          - proxy
+          - -c
+          - /etc/config/oathkeeper/oathkeeper.yml
+        env:
+        - name: LOG_LEVEL
+          value: debug
+        ports:
+        - containerPort: 4455
+        - containerPort: 4456
+        volumeMounts:
+        - name: oathkeeper-config
+          mountPath: /etc/config/oathkeeper
+          readOnly: true
+      volumes:
+      - name: oathkeeper-config
+        configMap:
+          name: oathkeeper-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: oathkeeper
+spec:
+  selector:
+    app: oathkeeper
+  ports:
+    - name: proxy
+      protocol: TCP
+      port: 4455
+      targetPort: 4455
+      nodePort: 30455
+    - name: api
+      protocol: TCP
+      port: 4456
+      targetPort: 4456
+      nodePort: 30456
+  type: NodePort
