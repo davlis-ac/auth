@@ -1,0 +1,49 @@
+{{- if .Values.maester.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "oathkeeper-stack.fullname" . }}-maester
+  labels:
+    {{- include "oathkeeper-stack.labels" . | nindent 4 }}
+    app.kubernetes.io/component: maester
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "oathkeeper-stack.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: maester
+  template:
+    metadata:
+      labels:
+        {{- include "oathkeeper-stack.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: maester
+    spec:
+      serviceAccountName: {{ include "oathkeeper-stack.serviceAccountName" . }}
+      containers:
+        - name: manager
+          image: "{{ .Values.maester.image.repository }}:{{ .Values.maester.image.tag }}"
+          imagePullPolicy: {{ .Values.maester.image.pullPolicy }}
+          command:
+            - /manager
+          args:
+            - --metrics-addr=0.0.0.0:8080
+            {{- if .Values.maester.leaderElection.enabled }}
+            - --enable-leader-election
+            {{- end }}
+          env:
+            - name: NAMESPACE
+              value: "default"
+            - name: WATCH_NAMESPACE
+              value: ""
+            - name: LEADER_ELECTION_ID
+              value: {{ .Values.maester.leaderElection.id | quote }}
+          ports:
+            - containerPort: 8080
+              name: metrics
+              protocol: TCP
+            - containerPort: 9443
+              name: webhook-server
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.maester.resources | nindent 12 }}
+{{- end }}

@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "oathkeeper-stack.fullname" . }}-proxy
+  labels:
+    {{- include "oathkeeper-stack.labels" . | nindent 4 }}
+    app.kubernetes.io/component: oathkeeper
+spec:
+  type: {{ .Values.oathkeeper.service.type }}
+  ports:
+    - port: {{ .Values.oathkeeper.service.proxy.port }}
+      targetPort: proxy
+      protocol: TCP
+      name: proxy
+      {{- if eq .Values.oathkeeper.service.type "NodePort" }}
+      nodePort: {{ .Values.oathkeeper.service.proxy.nodePort }}
+      {{- end }}
+  selector:
+    {{- include "oathkeeper-stack.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: oathkeeper
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "oathkeeper-stack.fullname" . }}-api
+  labels:
+    {{- include "oathkeeper-stack.labels" . | nindent 4 }}
+    app.kubernetes.io/component: oathkeeper
+spec:
+  type: {{ .Values.oathkeeper.service.type }}
+  ports:
+    - port: {{ .Values.oathkeeper.service.api.port }}
+      targetPort: api
+      protocol: TCP
+      name: api
+      {{- if eq .Values.oathkeeper.service.type "NodePort" }}
+      nodePort: {{ .Values.oathkeeper.service.api.nodePort }}
+      {{- end }}
+  selector:
+    {{- include "oathkeeper-stack.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: oathkeeper

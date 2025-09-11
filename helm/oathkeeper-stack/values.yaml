@@ -1,0 +1,104 @@
+# Default values for oathkeeper-stack.
+replicaCount: 1
+
+oathkeeper:
+  image:
+    repository: oryd/oathkeeper
+    pullPolicy: IfNotPresent
+    tag: "v0.40.6"
+  
+  config:
+    log:
+      level: debug
+      format: json
+      leak_sensitive_values: true
+    serve:
+      proxy:
+        cors:
+          enabled: false
+    errors:
+      fallback:
+        - json
+      handlers:
+        json:
+          enabled: true
+          config:
+            verbose: true
+    authenticators:
+      anonymous:
+        enabled: true
+        config:
+          subject: guest
+      bearer_token:
+        enabled: true
+        config:
+          check_session_url: http://auth-server:3000/sessions/whoami
+          preserve_path: true
+          extra_from: 'identity.metadata_public'
+          subject_from: 'identity.traits.username'
+      noop:
+        enabled: true
+    authorizers:
+      allow:
+        enabled: true
+    mutators:
+      noop:
+        enabled: true
+      header:
+        enabled: true
+        config:
+          headers:
+            x-ant-user: '{{ print .Subject }}'
+            x-ant-user-roles: '{{ print .Extra.roles }}'
+            x-ant-user-custom-metadata: '{{ print .Extra.customMetadata }}'
+
+  service:
+    type: NodePort
+    proxy:
+      port: 4455
+      nodePort: 30455
+    api:
+      port: 4456
+      nodePort: 30456
+
+maester:
+  enabled: true
+  image:
+    repository: oryd/oathkeeper-maester
+    pullPolicy: IfNotPresent
+    tag: "v0.1.9"
+  
+  leaderElection:
+    enabled: false
+    id: "oathkeeper-maester"
+  
+  resources:
+    limits:
+      cpu: 100m
+      memory: 30Mi
+    requests:
+      cpu: 100m
+      memory: 20Mi
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+
+securityContext: {}
+
+resources: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

@@ -1,0 +1,28 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: myapp
+  namespace: default
+spec:
+  releaseName: myapp
+  chart:
+    spec:
+      chart: ./helm/myapp
+      sourceRef:
+        kind: GitRepository
+        name: auth-poc
+        namespace: flux-system
+  interval: 5m
+  install:
+    createNamespace: true
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    image:
+      repository: myapp
+      tag: v1
+      pullPolicy: Never
+    service:
+      type: ClusterIP
+      port: 4000

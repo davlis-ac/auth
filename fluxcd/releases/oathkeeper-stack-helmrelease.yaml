@@ -1,0 +1,40 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: oathkeeper-stack
+  namespace: ory
+spec:
+  releaseName: oathkeeper-stack
+  chart:
+    spec:
+      chart: ./helm/oathkeeper-stack
+      sourceRef:
+        kind: GitRepository
+        name: auth-poc
+        namespace: flux-system
+  interval: 5m
+  install:
+    createNamespace: true
+  upgrade:
+    remediation:
+      retries: 3
+  values:
+    oathkeeper:
+      image:
+        repository: oryd/oathkeeper
+        tag: v0.40.6
+      config:
+        authenticators:
+          bearer_token:
+            config:
+              check_session_url: http://auth-server.default.svc.cluster.local:3000/sessions/whoami
+      service:
+        type: NodePort
+        proxy:
+          nodePort: 30455
+        api:
+          nodePort: 30456
+    maester:
+      enabled: true
+    serviceAccount:
+      create: true
