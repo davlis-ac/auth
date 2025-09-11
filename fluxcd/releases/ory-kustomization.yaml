@@ -1,0 +1,14 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: ory-helm-releases
+  namespace: flux-system
+spec:
+  interval: 5m
+  path: "./fluxcd/releases"
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: auth-poc
+  dependsOn:
+    - name: ory-sources
