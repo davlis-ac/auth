@@ -7,8 +7,8 @@ image:
   tag: "v1"
 
 imagePullSecrets: []
-nameOverride: ""
-fullnameOverride: ""
+nameOverride: "myapp"
+fullnameOverride: "myapp"
 
 serviceAccount:
   create: false
