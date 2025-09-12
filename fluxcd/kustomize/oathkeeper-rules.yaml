@@ -33,21 +33,4 @@ spec:
     handler: allow
   mutators:
     - handler: header
----
-apiVersion: oathkeeper.ory.sh/v1alpha1
-kind: Rule
-metadata:
-  name: skills-app-rule
-  namespace: ory
-spec:
-  upstream:
-    url: "http://skills-app.default.svc.cluster.local:8080"
-  match:
-    url: "<https|http>://<.*>/skills/v1<.*>"
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"]
-  authenticators:
-    - handler: bearer_token
-  authorizer:
-    handler: allow
-  mutators:
-    - handler: header
+
