@@ -15,3 +15,21 @@ spec:
     handler: allow
   mutators:
     - handler: header
+---
+apiVersion: oathkeeper.ory.sh/v1alpha1
+kind: Rule
+metadata:
+  name: myapp-rule
+spec:
+  upstream:
+    url: "http://myapp:4000"
+    preserveHost: true
+  match:
+    url: "<https|http>://<.*>/app/v1<.*>"
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"]
+  authenticators:
+    - handler: bearer_token
+  authorizer:
+    handler: allow
+  mutators:
+    - handler: header
