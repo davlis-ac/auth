@@ -49,6 +49,6 @@ data:
         enabled: true
         config:
           headers:
-            x-ant-user: '{{`{{ print .Subject }}`}}'
-            x-ant-user-roles: '{{`{{ print .Extra.roles }}`}}'
-            x-ant-user-custom-metadata: '{{`{{ print .Extra.customMetadata }}`}}'
+            x-company-user: '{{`{{ print .Subject }}`}}'
+            x-company-user-roles: '{{`{{ print .Extra.roles }}`}}'
+            x-company-user-custom-metadata: '{{`{{ print .Extra.customMetadata }}`}}'
