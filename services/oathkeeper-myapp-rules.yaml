@@ -5,6 +5,7 @@ metadata:
 spec:
   upstream:
     url: "http://myapp:4000"
+    preserveHost: true
   match:
     url: "<https|http>://<.*>/myapp/v1<.*>"
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"]
