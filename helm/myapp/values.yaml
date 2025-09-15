@@ -57,7 +57,7 @@ oathkeeper:
     api:
       enabled: true
       name: "myapp-api-rule"
-      urlPattern: "<https|http>://<.*>/myapp/v1<.*>"
+      urlPattern: "<https|http>://<.*>/my/v1<.*>"
       methods: ["GET", "POST", "PUT", "PATCH", "DELETE"]
       authenticator:
         handler: bearer_token
