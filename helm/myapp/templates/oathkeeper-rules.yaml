@@ -1,6 +1,6 @@
 {{- if .Values.oathkeeper.enabled }}
 {{- if .Values.oathkeeper.rules.api.enabled }}
-apiVersion: rules.oathkeeper.ory.sh/v1alpha
+apiVersion: oathkeeper.ory.sh/v1alpha1
 kind: Rule
 metadata:
   name: {{ .Values.oathkeeper.rules.api.name | default (printf "%s-api-rule" (include "myapp.fullname" .)) }}
