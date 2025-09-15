@@ -54,7 +54,7 @@ const response = {
 }
 
 app.use((req, res, next) => {
-    console.log('Request receivedx', req.method, req.url);
+    console.log('Request received', req.method, req.url);
     next();
 });
 
@@ -64,11 +64,11 @@ app.all('/sessions/whoami', (req, res) => {
   console.log('authHeader', authHeader);
 
   if (!authHeader) {
-    // return res.status(401).json({ error: 'Unauthorized' });
+    return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  if (authHeader !== 'Bearer token') {
-    // return res.status(401).json({ error: 'Unauthorized' });
+  if (authHeader !== 'Bearer dobryToken') {
+    return res.status(401).json({ error: 'Unauthorized' });
   }
 
   res.status(200).json(response);
