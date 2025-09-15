@@ -10,7 +10,13 @@ myapp.use((req, res, next) => {
 myapp.get('/myapp/v1/api', (req, res) => {
   console.log('Received request for /myapp/v1/api');
   console.log('Headers:', req.headers);
-  res.json({ message: 'Hello from myapp!' });
+  res.json({ message: 'Hello from myapp/v1/api!' });
+});
+
+myapp.get('/my/v1/api', (req, res) => {
+  console.log('Received request for /my/v1/api');
+  console.log('Headers:', req.headers);
+  res.json({ message: 'Hello from my/v1/api!' });
 });
 
 myapp.listen(port, () => {
