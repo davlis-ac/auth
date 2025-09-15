@@ -1,8 +1,8 @@
 {
-  "name": "myapp",
+  "name": "myapp-02",
   "version": "1.0.0",
   "description": "Simple Express application with API endpoints",
-  "main": "myapp.js",
+  "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js"

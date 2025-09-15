@@ -1,0 +1,25 @@
+{{- if .Values.oathkeeper.enabled }}
+{{- if .Values.oathkeeper.rules.api.enabled }}
+apiVersion: oathkeeper.ory.sh/v1alpha1
+kind: Rule
+metadata:
+  name: {{ .Values.oathkeeper.rules.api.name | default (printf "%s-api-rule" (include "myapp.fullname" .)) }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "myapp.labels" . | nindent 4 }}
+spec:
+  upstream:
+    url: "http://{{ include "myapp.fullname" . }}:{{ .Values.service.port }}"
+    preserveHost: true
+  match:
+    url: {{ .Values.oathkeeper.rules.api.urlPattern | quote }}
+    methods: {{ .Values.oathkeeper.rules.api.methods | toJson }}
+  authenticators:
+    - handler: {{ .Values.oathkeeper.rules.api.authenticator.handler }}
+  authorizer:
+    handler: {{ .Values.oathkeeper.rules.api.authorizer.handler }}
+  mutators:
+    - handler: {{ .Values.oathkeeper.rules.api.mutator.handler }}
+---
+{{- end }}
+{{- end }}
