@@ -67,7 +67,7 @@ app.all('/sessions/whoami', (req, res) => {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  if (authHeader !== 'Bearer dobryToken') {
+  if (authHeader !== 'Bearer dobrytoken') {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
