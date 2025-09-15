@@ -46,6 +46,9 @@ Key configuration values in `values.yaml`:
 - **service.type**: `ClusterIP` - Service type (internal)
 - **service.port**: `4000` - Application port
 - **healthCheck.path**: `/myapp/v1/api` - Health check endpoint
+- **oathkeeper.enabled**: `true` - Enable Oathkeeper access rules
+- **oathkeeper.rules.api**: Configuration for API endpoint protection
+- **oathkeeper.rules.health**: Configuration for health check access
 
 ## Service Details
 
@@ -65,4 +68,20 @@ docker run -p 4000:4000 myapp:v1
 Test the API:
 ```bash
 curl http://localhost:4000/myapp/v1/api
+```
+
+## Oathkeeper Integration
+
+The chart includes built-in Oathkeeper access rules. See [OATHKEEPER.md](OATHKEEPER.md) for detailed configuration options.
+
+Quick examples:
+```bash
+# Deploy with Oathkeeper rules (default)
+helm install myapp .helm/
+
+# Deploy without Oathkeeper rules
+helm install myapp .helm/ --set oathkeeper.enabled=false
+
+# Custom session validation URL
+helm install myapp .helm/ --set oathkeeper.rules.api.authenticator.config.check_session_url="http://custom-auth:8080/validate"
 ```

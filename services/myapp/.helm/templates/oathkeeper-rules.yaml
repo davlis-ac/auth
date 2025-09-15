@@ -1,0 +1,71 @@
+{{- if .Values.oathkeeper.enabled }}
+{{- if .Values.oathkeeper.rules.api.enabled }}
+apiVersion: oathkeeper.ory.sh/v1alpha1
+kind: Rule
+metadata:
+  name: {{ .Values.oathkeeper.rules.api.name | default (printf "%s-api-rule" (include "myapp.fullname" .)) }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "myapp.labels" . | nindent 4 }}
+spec:
+  upstream:
+    url: "http://{{ include "myapp.fullname" . }}:{{ .Values.service.port }}"
+    preserveHost: true
+  match:
+    url: {{ .Values.oathkeeper.rules.api.urlPattern | quote }}
+    methods: {{ .Values.oathkeeper.rules.api.methods | toJson }}
+  authenticators:
+    - handler: {{ .Values.oathkeeper.rules.api.authenticator.handler }}
+      {{- if .Values.oathkeeper.rules.api.authenticator.config }}
+      config:
+        {{- toYaml .Values.oathkeeper.rules.api.authenticator.config | nindent 8 }}
+      {{- end }}
+  authorizer:
+    handler: {{ .Values.oathkeeper.rules.api.authorizer.handler }}
+    {{- if .Values.oathkeeper.rules.api.authorizer.config }}
+    config:
+      {{- toYaml .Values.oathkeeper.rules.api.authorizer.config | nindent 6 }}
+    {{- end }}
+  mutators:
+    - handler: {{ .Values.oathkeeper.rules.api.mutator.handler }}
+      {{- if .Values.oathkeeper.rules.api.mutator.config }}
+      config:
+        {{- toYaml .Values.oathkeeper.rules.api.mutator.config | nindent 8 }}
+      {{- end }}
+---
+{{- end }}
+{{- if .Values.oathkeeper.rules.health.enabled }}
+apiVersion: oathkeeper.ory.sh/v1alpha1
+kind: Rule
+metadata:
+  name: {{ .Values.oathkeeper.rules.health.name | default (printf "%s-health-rule" (include "myapp.fullname" .)) }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "myapp.labels" . | nindent 4 }}
+spec:
+  upstream:
+    url: "http://{{ include "myapp.fullname" . }}:{{ .Values.service.port }}"
+    preserveHost: true
+  match:
+    url: {{ .Values.oathkeeper.rules.health.urlPattern | quote }}
+    methods: {{ .Values.oathkeeper.rules.health.methods | toJson }}
+  authenticators:
+    - handler: {{ .Values.oathkeeper.rules.health.authenticator.handler }}
+      {{- if .Values.oathkeeper.rules.health.authenticator.config }}
+      config:
+        {{- toYaml .Values.oathkeeper.rules.health.authenticator.config | nindent 8 }}
+      {{- end }}
+  authorizer:
+    handler: {{ .Values.oathkeeper.rules.health.authorizer.handler }}
+    {{- if .Values.oathkeeper.rules.health.authorizer.config }}
+    config:
+      {{- toYaml .Values.oathkeeper.rules.health.authorizer.config | nindent 6 }}
+    {{- end }}
+  mutators:
+    - handler: {{ .Values.oathkeeper.rules.health.mutator.handler }}
+      {{- if .Values.oathkeeper.rules.health.mutator.config }}
+      config:
+        {{- toYaml .Values.oathkeeper.rules.health.mutator.config | nindent 8 }}
+      {{- end }}
+{{- end }}
+{{- end }}

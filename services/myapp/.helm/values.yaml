@@ -49,3 +49,48 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+# Health check configuration
+healthCheck:
+  enabled: true
+  path: "/myapp/v1/api"
+  initialDelaySeconds: 30
+  periodSeconds: 10
+
+# Oathkeeper access rules configuration
+oathkeeper:
+  enabled: true
+  rules:
+    api:
+      enabled: true
+      name: "myapp-api-rule"
+      urlPattern: "<https|http>://<.*>/myapp/v1<.*>"
+      methods: ["GET", "POST", "PUT", "PATCH", "DELETE"]
+      authenticator:
+        handler: bearer_token
+        config:
+          check_session_url: "http://auth-server:3000/sessions/whoami"
+          preserve_query: true
+          preserve_path: true
+          extra_from: "@this"
+          subject_from: "subject"
+          forward_http_headers: ["Authorization"]
+      authorizer:
+        handler: allow
+      mutator:
+        handler: header
+        config:
+          headers:
+            X-User: "{{ print .Subject }}"
+            X-User-ID: "{{ print .Extra.sub }}"
+    health:
+      enabled: true
+      name: "myapp-health-rule"
+      urlPattern: "<https|http>://<.*>/myapp/health<.*>"
+      methods: ["GET"]
+      authenticator:
+        handler: anonymous
+      authorizer:
+        handler: allow
+      mutator:
+        handler: noop
