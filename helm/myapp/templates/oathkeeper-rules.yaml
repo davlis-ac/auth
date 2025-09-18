@@ -1,4 +1,4 @@
-{{- if .Values.oathkeeper.enabledx }}
+{{- if .Values.oathkeeper.enabled }}
 {{- if .Values.oathkeeper.rules.api.enabled }}
 apiVersion: oathkeeper.ory.sh/v1alpha1
 kind: Rule
