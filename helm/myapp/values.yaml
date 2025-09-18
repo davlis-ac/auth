@@ -52,7 +52,7 @@ affinity: {}
 
 # Oathkeeper access rules configuration
 oathkeeper:
-  enabled: false
+  enabled: true
   rules:
     api:
       enabled: true
