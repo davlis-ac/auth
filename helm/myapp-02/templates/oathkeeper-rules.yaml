@@ -1,25 +1,38 @@
 {{- if .Values.oathkeeper.enabled }}
-{{- if .Values.oathkeeper.rules.api.enabled }}
+{{- range $ruleConfigKey, $rule := .Values.oathkeeper.rules }}
+{{- if $rule.enabled }}
+---
 apiVersion: oathkeeper.ory.sh/v1alpha1
 kind: Rule
 metadata:
-  name: {{ .Values.oathkeeper.rules.api.name | default (printf "%s-api-rule" (include "myapp.fullname" .)) }}
-  namespace: {{ .Release.Namespace }}
+  name: {{ $rule.name | default (printf "%s-%s-rule" (include "generic-chart.fullname" $) $ruleConfigKey) }}
   labels:
-    {{- include "myapp.labels" . | nindent 4 }}
+    {{- include "generic-chart.labels" $ | nindent 4 }}
 spec:
-  upstream:
-    url: "http://{{ include "myapp.fullname" . }}:{{ .Values.service.port }}"
-    preserveHost: true
   match:
-    url: {{ .Values.oathkeeper.rules.api.urlPattern | quote }}
-    methods: {{ .Values.oathkeeper.rules.api.methods | toJson }}
+    url: {{ $rule.urlPattern | quote }}
+    methods: {{ $rule.methods | toJson }}
+  upstream:
+    preserveHost: {{ $rule.upstream.preserveHost | default true }}
+    url: {{ $rule.upstream.url | quote }}
   authenticators:
-    - handler: {{ .Values.oathkeeper.rules.api.authenticator.handler }}
+    - handler: {{ $rule.authenticator.handler | quote }}
+      {{- if $rule.authenticator.config }}
+      config:
+        {{- toYaml $rule.authenticator.config | nindent 8 }}
+      {{- end }}
   authorizer:
-    handler: {{ .Values.oathkeeper.rules.api.authorizer.handler }}
+    handler: {{ $rule.authorizer.handler | quote }}
+    {{- if $rule.authorizer.config }}
+    config:
+      {{- toYaml $rule.authorizer.config | nindent 6 }}
+    {{- end }}
   mutators:
-    - handler: {{ .Values.oathkeeper.rules.api.mutator.handler }}
----
+    - handler: {{ $rule.mutator.handler | quote }}
+      {{- if $rule.mutator.config }}
+      config:
+        {{- toYaml $rule.mutator.config | nindent 8 }}
+      {{- end }}
+{{- end }}
 {{- end }}
 {{- end }}

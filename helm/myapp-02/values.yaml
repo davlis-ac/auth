@@ -51,17 +51,17 @@ tolerations: []
 affinity: {}
 
 # Oathkeeper access rules configuration
-oathkeeper:
-  enabled: false
-  rules:
-    api:
-      enabled: true
-      name: "myapp-02-api-rule"
-      urlPattern: "<https|http>://<.*>/myapp-02/v1<.*>"
-      methods: ["GET", "POST", "PUT", "PATCH", "DELETE"]
-      authenticator:
-        handler: bearer_token
-      authorizer:
-        handler: allow
-      mutator:
-        handler: header
+# oathkeeper:
+#  enabled: false
+#  rules:
+#    api:
+#      enabled: true
+#      name: "myapp-02-api-rule"
+#      urlPattern: "<https|http>://<.*>/myapp-02/v1<.*>"
+#      methods: ["GET", "POST", "PUT", "PATCH", "DELETE"]
+#      authenticator:
+#        handler: bearer_token
+#      authorizer:
+#        handler: allow
+#      mutator:
+#        handler: header
